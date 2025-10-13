@@ -10,7 +10,7 @@
         @changeChapter="changeChapter"
       />
       <div v-if="item.length > 0" id="lesson-directory">
-        <template v-if="chapterNum > 0">
+        <template v-if="chapterNum > 0 && Array.isArray(item[slideIndex].children)">
           <div
             v-for="(list, index) in item[slideIndex].children"
             :key="index"
@@ -145,16 +145,29 @@ export default {
         );
       });
     },
-    findTaskOuterIndex(nestedArrays, taskId) {
+    findOuterIndex(nestedArrays, target) {
       for (let i = 0; i < nestedArrays.length; i++) {
-        const innerArray = nestedArrays[i];
-        if (innerArray.includes(taskId)) {
-          return i;
+        const outer = nestedArrays[i];
+        if (Array.isArray(outer)) {
+          if (this.containsTarget(outer, target)) {
+            return i;
+          }
         }
       }
       return -1;
     },
+    containsTarget(arr, target) {
+      for (const item of arr) {
+        if (Array.isArray(item)) {
+          if (this.containsTarget(item, target)) return true;
+        } else {
+          if (item === target) return true;
+        }
+      }
+      return false;
+    },
     findElementIndex(target, array) {
+      if (!Array.isArray(array)) return;
       return array.findIndex(innerArray => {
         if (Array.isArray(innerArray) && innerArray.some) {
           return innerArray.some(item =>
@@ -168,17 +181,19 @@ export default {
       const {lastLearnTaskType, lastLearnTaskId} = this.$route.query;
       const allTaskIds = this.extractAllTaskIds(this.item);
       const taskIds = this.simplifyNestedArrays(this.extractAllTaskIds(this.item));
-      const chapterIndex = this.findTaskOuterIndex(taskIds, lastLearnTaskId);
+      const chapterIndex = this.findOuterIndex(allTaskIds, lastLearnTaskId);
       const unitIndex = this.findElementIndex(lastLearnTaskId, allTaskIds[chapterIndex]);
-      const lessonIndex = allTaskIds[chapterIndex][unitIndex].findIndex(item => item.includes(lastLearnTaskId))
-      const outerIndex = allTaskIds[chapterIndex].findIndex(subArr =>
-        subArr.some(innerArr => innerArr[0] === lastLearnTaskId)
-      );
-      this.slideIndex = chapterIndex;
+      const lessonIndex = allTaskIds[chapterIndex]?.[unitIndex]?.findIndex(item => item.includes(lastLearnTaskId)) ?? -1;
+      if (Array.isArray(this.item?.[chapterIndex]?.children)) {
+        this.slideIndex = chapterIndex;
+      }
       this.$nextTick(() => {
-        const element = document.getElementById(lastLearnTaskId);
-        if (element && taskIds[chapterIndex].includes(lastLearnTaskId)) {
-          const lessonItem = this.item[this.slideIndex].children[unitIndex].children[lessonIndex];
+        console.log('-item-', this.item);
+        console.log('-lastLearnTaskId-', lastLearnTaskId)
+        console.log('-allTaskIds-', allTaskIds)
+        console.log('-chapterIndex-', chapterIndex)
+        if (taskIds?.[chapterIndex]?.includes(lastLearnTaskId)) {
+          const lessonItem = this.item?.[this.slideIndex]?.children?.[unitIndex]?.children?.[lessonIndex];
           this.$refs.lessonDirectory[unitIndex].lessonCellClick(
             lessonItem.tasks[lessonItem.index],
             lessonIndex,

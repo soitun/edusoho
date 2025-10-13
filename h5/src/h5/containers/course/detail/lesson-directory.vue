@@ -246,6 +246,7 @@ export default {
   mounted() {
     if (Object.keys(this.$route.query).length) {
       const {sourceType, taskId} = this.$route.query;
+      if (!sourceType || !taskId) return;
       this.setSourceType({
         sourceType: sourceType,
         taskId: taskId,
