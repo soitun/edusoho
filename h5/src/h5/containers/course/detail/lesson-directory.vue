@@ -178,8 +178,6 @@ import * as types from '@/store/mutation-types';
 import {Toast, Dialog} from 'vant';
 import Api from '@/api';
 import {closedToast} from '@/utils/on-status.js';
-import {SET_TASK_SATUS} from '@/store/mutation-types';
-
 
 export default {
   name: 'LessonDirectory',
@@ -246,16 +244,12 @@ export default {
     },
   },
   mounted() {
-    if (this.$route.query.lastLearnTaskId && this.$route.query.lastLearnTaskType) {
-      this.initLastLearnTaskEvent();
-    } else {
-      if (Object.keys(this.$route.query).length) {
-        const {sourceType, taskId} = this.$route.query;
-        this.setSourceType({
-          sourceType: sourceType,
-          taskId: taskId,
-        });
-      }
+    if (Object.keys(this.$route.query).length) {
+      const {sourceType, taskId} = this.$route.query;
+      this.setSourceType({
+        sourceType: sourceType,
+        taskId: taskId,
+      });
     }
   },
   methods: {
@@ -263,17 +257,6 @@ export default {
       setSourceType: types.SET_SOURCETYPE,
       setTaskStatus: types.SET_TASK_SATUS
     }),
-    initLastLearnTaskEvent() {
-      const {lastLearnTaskType, lastLearnTaskId} = this.$route.query;
-      this.setSourceType({
-        sourceType: lastLearnTaskType,
-        taskId: lastLearnTaskId,
-      });
-      const element = document.getElementById(this.$route.query.lastLearnTaskId);
-      if (element) {
-        element.click();
-      }
-    },
     // 获取lesson位置
     getTaskId() {
       this.currentTask = this.taskId;
