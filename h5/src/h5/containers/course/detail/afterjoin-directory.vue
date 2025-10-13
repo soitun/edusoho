@@ -114,10 +114,9 @@ export default {
       handler: 'changeTaskStatus',
       immediate: false,
     },
-  },
-  mounted() {
-    if (this.$route.query.lastLearnTaskId && this.$route.query.lastLearnTaskType) {
-      this.initLastLearnTaskEvent();
+    item: {
+      handler: 'initLastLearnTaskEvent',
+      immediate: false,
     }
   },
   methods: {
@@ -178,7 +177,8 @@ export default {
       });
     },
     initLastLearnTaskEvent() {
-      const {lastLearnTaskType, lastLearnTaskId} = this.$route.query;
+      if (!this.$route.query.lastLearnTaskId || !this.$route.query.lastLearnTaskType) return;
+      const {lastLearnTaskId} = this.$route.query;
       const allTaskIds = this.extractAllTaskIds(this.item);
       const taskIds = this.simplifyNestedArrays(this.extractAllTaskIds(this.item));
       const chapterIndex = this.findOuterIndex(allTaskIds, lastLearnTaskId);
@@ -188,10 +188,6 @@ export default {
         this.slideIndex = chapterIndex;
       }
       this.$nextTick(() => {
-        console.log('-item-', this.item);
-        console.log('-lastLearnTaskId-', lastLearnTaskId)
-        console.log('-allTaskIds-', allTaskIds)
-        console.log('-chapterIndex-', chapterIndex)
         if (taskIds?.[chapterIndex]?.includes(lastLearnTaskId)) {
           const lessonItem = this.item?.[this.slideIndex]?.children?.[unitIndex]?.children?.[lessonIndex];
           this.$refs.lessonDirectory[unitIndex].lessonCellClick(
