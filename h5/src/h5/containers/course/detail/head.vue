@@ -231,6 +231,7 @@ export default {
       // 未登录情况下，详情页面不需要初始化播放器
       if (this.$route.name === 'course' && !this.joinStatus) return;
       if (value > 0) {
+        console.log('taskId发生了改变', value);
         this.initHead();
       }
     },
@@ -368,7 +369,9 @@ export default {
       this.getData();
     },
     async getData() {
+      console.log('---------', this.taskId, this.sourceType)
       this.watermark = await getTaskWatermark();
+      console.log('---------', this.taskId, this.sourceType)
       Api.getMedia(this.getParams())
         .then(async res => {
           const {
