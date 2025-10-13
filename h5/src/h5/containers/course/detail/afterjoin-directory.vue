@@ -10,7 +10,7 @@
         @changeChapter="changeChapter"
       />
       <div v-if="item.length > 0" id="lesson-directory">
-        <template v-if="chapterNum > 0">
+        <template v-if="chapterNum > 0 && Array.isArray(item[slideIndex].children)">
           <div
             v-for="(list, index) in item[slideIndex].children"
             :key="index"
@@ -18,6 +18,8 @@
           >
             <util-directory :util="list" />
             <lesson-directory
+              ref="lessonDirectory"
+              :key="index"
               :lesson="list.children"
               :task-id="taskId"
               :task-number="item[slideIndex].lessonNum"
@@ -30,6 +32,7 @@
         </template>
         <div v-else class="pd-bo">
           <lesson-directory
+            ref="lessonDirectory"
             :lesson="item[slideIndex].children"
             :task-id="taskId"
             :task-number="item[slideIndex].lessonNum"
@@ -111,34 +114,89 @@ export default {
       handler: 'changeTaskStatus',
       immediate: false,
     },
-  },
-  mounted() {
-    if (this.$route.query.lastLearnTaskId && this.$route.query.lastLearnTaskType) {
-      this.initLastLearnTaskEvent();
+    item: {
+      handler: 'initLastLearnTaskEvent',
+      immediate: false,
     }
   },
   methods: {
     ...mapMutations('course', {
       setSourceType: types.SET_SOURCETYPE,
     }),
-    getCurrentChapterTaskIds(itemChildren) {
-      return itemChildren.flatMap(item => {
-        const currentTaskIds = (item.tasks || []).map(task => task.id).filter(Boolean);
-        const childrenTaskIds = item.children ? this.getCurrentChapterTaskIds(item.children) : [];
-        return [...currentTaskIds, ...childrenTaskIds];
+    extractAllTaskIds(nodes) {
+      return nodes.map(node => {
+        if (node.children && Array.isArray(node.children)) {
+          return this.extractAllTaskIds(node.children);
+        }
+        else if (node.tasks && Array.isArray(node.tasks)) {
+          return node.tasks.map(task => task.id).filter(id => id != null);
+        }
+        else {
+          return [];
+        }
+      });
+    },
+    simplifyNestedArrays(array) {
+      return array.map(outerArray => {
+        if (!Array.isArray(outerArray)) return outerArray;
+        return outerArray.flatMap(innerArray =>
+          Array.isArray(innerArray) ? innerArray.flat() : innerArray
+        );
+      });
+    },
+    findOuterIndex(nestedArrays, target) {
+      for (let i = 0; i < nestedArrays.length; i++) {
+        const outer = nestedArrays[i];
+        if (Array.isArray(outer)) {
+          if (this.containsTarget(outer, target)) {
+            return i;
+          }
+        }
+      }
+      return -1;
+    },
+    containsTarget(arr, target) {
+      for (const item of arr) {
+        if (Array.isArray(item)) {
+          if (this.containsTarget(item, target)) return true;
+        } else {
+          if (item === target) return true;
+        }
+      }
+      return false;
+    },
+    findElementIndex(target, array) {
+      if (!Array.isArray(array)) return;
+      return array.findIndex(innerArray => {
+        if (Array.isArray(innerArray) && innerArray.some) {
+          return innerArray.some(item =>
+            Array.isArray(item) && item.includes && item.includes(target)
+          );
+        }
+        return false;
       });
     },
     initLastLearnTaskEvent() {
-      const {lastLearnTaskType, lastLearnTaskId} = this.$route.query;
-      this.setSourceType({
-        sourceType: lastLearnTaskType,
-        taskId: lastLearnTaskId,
-      });
-      const currentChapterTaskIds = this.getCurrentChapterTaskIds(this.item[this.slideIndex].children);
-      const element = document.getElementById(lastLearnTaskId);
-      if (element && currentChapterTaskIds.includes(lastLearnTaskId)) {
-        element.click();
+      if (!this.$route.query.lastLearnTaskId || !this.$route.query.lastLearnTaskType) return;
+      const {lastLearnTaskId} = this.$route.query;
+      const allTaskIds = this.extractAllTaskIds(this.item);
+      const taskIds = this.simplifyNestedArrays(this.extractAllTaskIds(this.item));
+      const chapterIndex = this.findOuterIndex(allTaskIds, lastLearnTaskId);
+      const unitIndex = this.findElementIndex(lastLearnTaskId, allTaskIds[chapterIndex]);
+      const lessonIndex = allTaskIds[chapterIndex]?.[unitIndex]?.findIndex(item => item.includes(lastLearnTaskId)) ?? -1;
+      if (Array.isArray(this.item?.[chapterIndex]?.children)) {
+        this.slideIndex = chapterIndex;
       }
+      this.$nextTick(() => {
+        if (taskIds?.[chapterIndex]?.includes(lastLearnTaskId)) {
+          const lessonItem = this.item?.[this.slideIndex]?.children?.[unitIndex]?.children?.[lessonIndex];
+          this.$refs.lessonDirectory[unitIndex].lessonCellClick(
+            lessonItem.tasks[lessonItem.index],
+            lessonIndex,
+            lessonItem.index
+          );
+        }
+      });
     },
     getNextStudy() {
       if (this.nextStudy.nextTask) {

@@ -47,6 +47,7 @@ export default {
 
     ...mapMutations('course', {
       setSourceType: types.SET_SOURCETYPE,
+      setOptimizationCourseLessons: types.GET_OPTIMIZATION_COURSE_LESSONS,
     }),
 
     async getData() {
@@ -106,6 +107,7 @@ export default {
       sourceType: 'img',
       taskId: 0
     });
+    this.setOptimizationCourseLessons([])
     next();
   }
 };

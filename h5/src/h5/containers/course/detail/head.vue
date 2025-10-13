@@ -257,10 +257,6 @@ export default {
     // 清除计时器
     this.clearComputeWatchTime();
   },
-  /*
-   * 试看需要传preview=1
-   * eg: /api/courses/1/task_medias/1?preview=1
-   */
   methods: {
     ...mapActions(['setCloudAddress']),
     ...mapMutations('course', {
@@ -285,9 +281,6 @@ export default {
         position: 'bottom',
       });
     },
-    // isAndroid() {
-    //   return !!navigator.userAgent.match(new RegExp('android', 'i'));
-    // },
     initHead() {
       if (['video', 'audio', 'ppt'].includes(this.sourceType)) {
         window.scrollTo(0, 0);
