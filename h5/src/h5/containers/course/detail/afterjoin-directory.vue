@@ -52,7 +52,7 @@
 import swiperDirectory from './swiper-directory.vue';
 import utilDirectory from './util-directory.vue';
 import lessonDirectory from './lesson-directory.vue';
-import { mapState } from 'vuex';
+import {mapMutations, mapState} from 'vuex';
 import * as types from '@/store/mutation-types';
 export default {
   name: 'AfterjoinDirectory',
@@ -91,7 +91,6 @@ export default {
       selectedPlanId: state => state.selectedPlanId,
       OptimizationCourseLessons: state => state.OptimizationCourseLessons,
       details: state => state.details,
-      // allTask: state => state.allTask,
       taskStatus: state => state.taskStatus
     }),
     hasChapter: function() {
@@ -113,7 +112,34 @@ export default {
       immediate: false,
     },
   },
+  mounted() {
+    if (this.$route.query.lastLearnTaskId && this.$route.query.lastLearnTaskType) {
+      this.initLastLearnTaskEvent();
+    }
+  },
   methods: {
+    ...mapMutations('course', {
+      setSourceType: types.SET_SOURCETYPE,
+    }),
+    getCurrentChapterTaskIds(itemChildren) {
+      return itemChildren.flatMap(item => {
+        const currentTaskIds = (item.tasks || []).map(task => task.id).filter(Boolean);
+        const childrenTaskIds = item.children ? this.getCurrentChapterTaskIds(item.children) : [];
+        return [...currentTaskIds, ...childrenTaskIds];
+      });
+    },
+    initLastLearnTaskEvent() {
+      const {lastLearnTaskType, lastLearnTaskId} = this.$route.query;
+      this.setSourceType({
+        sourceType: lastLearnTaskType,
+        taskId: lastLearnTaskId,
+      });
+      const currentChapterTaskIds = this.getCurrentChapterTaskIds(this.item[this.slideIndex].children);
+      const element = document.getElementById(lastLearnTaskId);
+      if (element && currentChapterTaskIds.includes(lastLearnTaskId)) {
+        element.click();
+      }
+    },
     getNextStudy() {
       if (this.nextStudy.nextTask) {
         this.taskId = Number(this.nextStudy.nextTask.id);
