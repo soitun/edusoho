@@ -190,9 +190,6 @@ export default {
       if (this.typeList === 'course_list') {
         this.$router.push({
           path: `/course/${id}`,
-          query: {
-            ...(this.course.lastLearnTask ? {lastLearnTaskId: this.course.lastLearnTask.id, lastLearnTaskType: this.course.lastLearnTask.type} : {})
-          },
         });
       }
     },

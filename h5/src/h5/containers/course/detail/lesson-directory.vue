@@ -6,13 +6,7 @@
           :id="lessonItem.tasks[lessonItem.index].id"
           :class="{ 'zb-ks': doubleLine(lessonItem.tasks[lessonItem.index]), 'py-16': showPaddingY(lessonItem.tasks[lessonItem.index].videoMaxLevel) }"
           class="lesson-title flex justify-between items-center relative px-12"
-          @click="
-            lessonCellClick(
-              lessonItem.tasks[lessonItem.index],
-              lessonIndex,
-              lessonItem.index,
-            )
-          "
+          @click="lessonCellClick(lessonItem.tasks[lessonItem.index])"
         >
           <div class="lesson-title-r">
             <div class="lesson-title-des">
@@ -133,7 +127,7 @@
               :id="taskItem.id"
               :key="taskIndex"
               class="litem"
-              @click="lessonCellClick(taskItem, lessonIndex, taskIndex)"
+              @click="lessonCellClick(taskItem)"
             >
               <div
                 :class="{ lessonactive: currentTask == Number(taskItem.id) }"
@@ -355,7 +349,7 @@ export default {
 
       return false;
     },
-    async lessonCellClick(task, lessonIndex, taskIndex) {
+    async lessonCellClick(task) {
       await this.getCourse();
       if (!this.isCanLearn(task)) {
         return closedToast('course');
