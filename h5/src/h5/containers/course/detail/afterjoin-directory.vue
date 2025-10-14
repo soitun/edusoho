@@ -117,6 +117,10 @@ export default {
     item: {
       handler: 'initLastLearnTaskEvent',
       immediate: false,
+    },
+    OptimizationCourseLessons: {
+      handler: 'processItem',
+      immediate: false,
     }
   },
   methods: {
