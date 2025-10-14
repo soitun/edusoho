@@ -155,7 +155,7 @@ class QuestionParseAdapter
         }
 
         foreach ($questions as &$question) {
-            // 检查题目类型
+            // 检查题目标题
             if (isset($question['title']) && is_string($question['title'])) {
                 $question['title'] = $this->escapeCode($question['title']);
             }
@@ -186,6 +186,11 @@ class QuestionParseAdapter
                         }
                     }
                 }
+            }
+
+            // 检查题目解析
+            if (isset($question['analysis']) && is_string($question['analysis'])) {
+                $question['analysis'] = $this->escapeCode($question['analysis']);
             }
 
             // 处理材料题中的子题目
