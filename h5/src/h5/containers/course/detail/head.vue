@@ -210,7 +210,7 @@ export default {
       joinStatus: state => state.joinStatus,
       user: state => state.joinStatus?.user || {},
       allTask: state => state.allTask,
-      nextStudy: state => state.nextStudy
+      nextStudy: state => state.nextStudy,
     }),
     showLearnBtn() {
       return this.joinStatus && ['video', 'audio', 'ppt'].includes(this.sourceType);
