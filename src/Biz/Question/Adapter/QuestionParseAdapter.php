@@ -126,6 +126,7 @@ class QuestionParseAdapter
      * @param $text
      * @return mixed
      */
+
     private function escapeCode($text)
     {
         // 使用正则表达式查找被 ``` 包裹的部分，并将其分开
@@ -137,16 +138,18 @@ class QuestionParseAdapter
         foreach ($parts as $part) {
             // 如果是被 ``` 包裹的部分，去掉前后的 ```
             if (preg_match('/^```(.*?)```$/s', $part, $matches)) {
-                $escapedParts[] = $matches[1]; // 只保留中间内容
+                // 对被包裹的部分进行转义
+                $escapedParts[] = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
             } else {
-                // 否则进行转义
-                $escapedParts[] = htmlspecialchars($part, ENT_QUOTES, 'UTF-8');
+                // 否则保留原样
+                $escapedParts[] = $part;
             }
         }
 
         // 合并所有部分
         return implode('', $escapedParts);
     }
+
 
     protected function escapeCodeInQuestions($questions) {
         // 检查 questions 是否为数组
@@ -155,7 +158,7 @@ class QuestionParseAdapter
         }
 
         foreach ($questions as &$question) {
-            // 检查题目类型
+            // 检查题目标题
             if (isset($question['title']) && is_string($question['title'])) {
                 $question['title'] = $this->escapeCode($question['title']);
             }
@@ -186,6 +189,11 @@ class QuestionParseAdapter
                         }
                     }
                 }
+            }
+
+            // 检查题目解析
+            if (isset($question['analysis']) && is_string($question['analysis'])) {
+                $question['analysis'] = $this->escapeCode($question['analysis']);
             }
 
             // 处理材料题中的子题目
