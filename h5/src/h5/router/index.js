@@ -238,23 +238,10 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "course" */ '@/containers/course/index.vue'),
     beforeEnter: (to, from, next) => {
-      const query = { ...to.query };
-
-      if (from.name !== 'goods_show' && from.name !== 'classroom') {
-        delete query.lastLearnTaskId;
-        delete query.lastLearnTaskType;
+      if (from.name) {
+        to.meta.fromRoute = from.name;
       }
-
-      const needsRedirect = JSON.stringify(to.query) !== JSON.stringify(query);
-      if (needsRedirect) {
-        next({
-          ...to,
-          query,
-          replace: true
-        });
-      } else {
-        next();
-      }
+      next();
     }
   },
   {

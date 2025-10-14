@@ -119,7 +119,7 @@ export default {
       immediate: false,
     },
     OptimizationCourseLessons: {
-      handler: 'processItem',
+      handler: 'onChangeOptimizationCourseLessons',
       immediate: false,
     }
   },
@@ -127,80 +127,123 @@ export default {
     ...mapMutations('course', {
       setSourceType: types.SET_SOURCETYPE,
     }),
-    extractAllTaskIds(nodes) {
-      return nodes.map(node => {
-        if (node.children && Array.isArray(node.children)) {
-          return this.extractAllTaskIds(node.children);
-        }
-        else if (node.tasks && Array.isArray(node.tasks)) {
-          return node.tasks.map(task => task.id).filter(id => id != null);
-        }
-        else {
-          return [];
-        }
-      });
-    },
-    simplifyNestedArrays(array) {
-      return array.map(outerArray => {
-        if (!Array.isArray(outerArray)) return outerArray;
-        return outerArray.flatMap(innerArray =>
-          Array.isArray(innerArray) ? innerArray.flat() : innerArray
-        );
-      });
-    },
-    findOuterIndex(nestedArrays, target) {
-      for (let i = 0; i < nestedArrays.length; i++) {
-        const outer = nestedArrays[i];
-        if (Array.isArray(outer)) {
-          if (this.containsTarget(outer, target)) {
-            return i;
-          }
-        }
-      }
-      return -1;
-    },
-    containsTarget(arr, target) {
-      for (const item of arr) {
-        if (Array.isArray(item)) {
-          if (this.containsTarget(item, target)) return true;
-        } else {
-          if (item === target) return true;
-        }
-      }
-      return false;
-    },
-    findElementIndex(target, array) {
-      if (!Array.isArray(array)) return;
-      return array.findIndex(innerArray => {
-        if (Array.isArray(innerArray) && innerArray.some) {
-          return innerArray.some(item =>
-            Array.isArray(item) && item.includes && item.includes(target)
-          );
-        }
-        return false;
-      });
-    },
     initLastLearnTaskEvent() {
-      if (!this.$route.query.lastLearnTaskId || !this.$route.query.lastLearnTaskType) return;
-      const {lastLearnTaskId} = this.$route.query;
-      const allTaskIds = this.extractAllTaskIds(this.item);
-      const taskIds = this.simplifyNestedArrays(this.extractAllTaskIds(this.item));
-      const chapterIndex = this.findOuterIndex(allTaskIds, lastLearnTaskId);
-      const unitIndex = this.findElementIndex(lastLearnTaskId, allTaskIds[chapterIndex]);
-      const lessonIndex = allTaskIds[chapterIndex]?.[unitIndex]?.findIndex(item => item.includes(lastLearnTaskId)) ?? -1;
-      if (Array.isArray(this.item?.[chapterIndex]?.children)) {
-        this.slideIndex = chapterIndex;
-      }
+      this.initSlideIndex();
+      const {chapterIndex, unitIndex, lessonIndex, taskId, taskType} = this.findLastLearnPosition(this.item);
+      this.slideIndex = chapterIndex;
       this.$nextTick(() => {
-        if (taskIds?.[chapterIndex]?.includes(lastLearnTaskId)) {
+        if (this.$route.meta.fromRoute === 'goods_show' || this.$route.meta.fromRoute === 'classroom') {
           const lessonItem = this.item?.[this.slideIndex]?.children?.[unitIndex]?.children?.[lessonIndex];
-          this.$refs.lessonDirectory[unitIndex].lessonCellClick(
-            lessonItem.tasks[lessonItem.index],
-            lessonIndex,
-            lessonItem.index
-          );
+          this.$refs.lessonDirectory[unitIndex].lessonCellClick(lessonItem.tasks[lessonItem.index]);
         }
-      });
+      })
+    },
+    initSlideIndex() {
+      const position = this.findLastLearnPosition(this.item);
+      if (!position) return
+      const {chapterIndex, unitIndex, lessonIndex, taskId, taskType} = position;
+      this.slideIndex = chapterIndex;
+    },
+    findLastLearnPosition(item) {
+      if (!this.isValidCourseData(item)) {
+        return null;
+      }
+      for (const [chapterIndex, chapter] of item.entries()) {
+        const lastLearnPosition = this.findLastLearnInChapter(chapter, chapterIndex);
+        if (lastLearnPosition) {
+          return lastLearnPosition;
+        }
+      }
+      return null;
+    },
+    isValidCourseData(courseData) {
+      if (!Array.isArray(courseData)) {
+        return false;
+      }
+      return true;
+    },
+    findLastLearnInChapter(chapter, chapterIndex) {
+      if (!this.hasChildren(chapter)) {
+        return null;
+      }
+      for (const [unitIndex, unit] of chapter.children.entries()) {
+        const lastLearnPosition = this.findLastLearnInUnit(unit, chapterIndex, unitIndex);
+        if (lastLearnPosition) {
+          return lastLearnPosition;
+        }
+      }
+      return null;
+    },
+    findLastLearnInUnit(unit, chapterIndex, unitIndex) {
+      if (!this.hasChildren(unit)) {
+        return null;
+      }
+      for (const [lessonIndex, lesson] of unit.children.entries()) {
+        const lastLearnPosition = this.findLastLearnInLesson(lesson, chapterIndex, unitIndex, lessonIndex);
+        if (lastLearnPosition) {
+          return lastLearnPosition;
+        }
+      }
+      return null;
+    },
+    findLastLearnInLesson(lesson, chapterIndex, unitIndex, lessonIndex) {
+      if (!this.hasTasks(lesson)) {
+        return null;
+      }
+      for (const [taskIndex, task] of lesson.tasks.entries()) {
+        if (this.isLastLearnTask(task)) {
+          return this.buildPositionInfo({
+            chapterIndex,
+            unitIndex,
+            lessonIndex,
+            taskIndex,
+            task,
+            chapter: this.getChapterByIndex(chapterIndex),
+            unit: this.getUnitByIndex(chapterIndex, unitIndex),
+            lesson
+          });
+        }
+      }
+      return null;
+    },
+    hasChildren(item) {
+      return item.children && Array.isArray(item.children) && item.children.length > 0;
+    },
+    hasTasks(lesson) {
+      return lesson.tasks && Array.isArray(lesson.tasks) && lesson.tasks.length > 0;
+    },
+    isLastLearnTask(task) {
+      return task.isLastLearn === true;
+    },
+    buildPositionInfo({
+      chapterIndex,
+      unitIndex,
+      lessonIndex,
+      taskIndex,
+      task,
+      chapter,
+      unit,
+      lesson
+    }) {
+      return {
+        chapterIndex,
+        unitIndex,
+        lessonIndex,
+        taskId: task.id,
+        taskType: task.type,
+        chapterTitle: chapter?.title || '',
+        unitTitle: unit?.title || '',
+        lessonTitle: lesson?.title || '',
+      };
+    },
+    getChapterByIndex(chapterIndex) {
+      return this.item?.[chapterIndex];
+    },
+    getUnitByIndex(chapterIndex, unitIndex) {
+      return this.item?.[chapterIndex]?.children?.[unitIndex];
+    },
+    onChangeOptimizationCourseLessons() {
+      this.processItem();
     },
     getNextStudy() {
       if (this.nextStudy.nextTask) {
@@ -217,7 +260,7 @@ export default {
       }
     },
     // 处理数据
-    processItem(val) {
+    processItem() {
       const res = this.OptimizationCourseLessons;
       this.resetData();
       if (!res.length) {
