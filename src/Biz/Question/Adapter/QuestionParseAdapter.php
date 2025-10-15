@@ -5,6 +5,7 @@ namespace Biz\Question\Adapter;
 use Codeages\Biz\ItemBank\Item\Constant\ItemDifficulty;
 use ExamParser\Constants\QuestionElement;
 use ExamParser\Constants\QuestionErrors;
+use Topxia\Service\Common\ServiceKernel;
 
 class QuestionParseAdapter
 {
@@ -141,13 +142,17 @@ class QuestionParseAdapter
                 // 对被包裹的部分进行转义
                 $escapedParts[] = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
             } else {
-                // 否则保留原样
-                $escapedParts[] = $part;
+                // 否则保留原样, 但要处理恶意代码
+                $escapedParts[] = $this->purifyHtml($part, true);
             }
         }
 
         // 合并所有部分
         return implode('', $escapedParts);
+    }
+
+    private function purifyHtml($html,$trusted = false) {
+        return ServiceKernel::instance()->getBiz()['html_helper']->purify($html, $trusted);
     }
 
 
