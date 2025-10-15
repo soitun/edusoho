@@ -151,8 +151,9 @@ class QuestionParseAdapter
         return implode('', $escapedParts);
     }
 
-    private function purifyHtml($html,$trusted = false) {
-        return ServiceKernel::instance()->getBiz()['html_helper']->purify($html, $trusted);
+    private function purifyHtml($html, $trusted = false)
+    {
+        return ServiceKernel::instance()->getBiz()['html_helper']->purify($html, $trusted, ['allowedOuterLink' => true, 'allowedImgSrc' => true]);
     }
 
 

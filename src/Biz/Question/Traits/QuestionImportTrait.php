@@ -30,21 +30,31 @@ trait QuestionImportTrait
         );
     }
 
-    private function downloadRemoteImgToLocal($imgs)
+    private function downloadRemoteImgToLocal(array $imgs)
     {
-        try {
-            $localImgs = [];
-            foreach ($imgs as $img) {
-                preg_match('/https?:\/\/(.*?)\/(.*?)\.(.*)/', $img, $match);
-                $localPath = $this->container->getParameter('topxia.upload.public_directory') . '/' . Uuid::uuid4() . '.' . $match[3];
-                file_put_contents($localPath, file_get_contents($img));
-                $localImgs[] = $localPath;
+        $localImgs = [];
+        $uploadDir = $this->container->getParameter('topxia.upload.public_directory');
+
+        foreach ($imgs as $img) {
+            if (!filter_var($img, FILTER_VALIDATE_URL)) {
+                throw QuestionBankException::IMAGE_DOWNLOAD_ERROR();
+            }
+            $ext = pathinfo(parse_url($img, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+            $localPath = $uploadDir . '/' . \Ramsey\Uuid\Uuid::uuid4() . '.' . $ext;
+
+            $content = @file_get_contents($img);
+            if ($content === false) {
+                throw QuestionBankException::IMAGE_DOWNLOAD_ERROR();
             }
 
-            return $this->getFileService()->addFiles('question', $localImgs);
-        } catch (\Exception $e) {
-            throw QuestionBankException::IMAGE_DOWNLOAD_ERROR();
+            if (file_put_contents($localPath, $content) === false) {
+                throw QuestionBankException::IMAGE_DOWNLOAD_ERROR();
+            }
+
+            $localImgs[] = $localPath;
         }
+
+        return $localImgs ? $this->getFileService()->addFiles('question', $localImgs) : [];
     }
 
     private function convertImgUri(array $uris)

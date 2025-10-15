@@ -20,7 +20,7 @@ class HTMLHelper
         $this->biz = $biz;
     }
 
-    public function purify($html, $trusted = false)
+    public function purify($html, $trusted = false, $extraConfig = [])
     {
         if (!isset($html)) {
             return '';
@@ -38,8 +38,12 @@ class HTMLHelper
 
         $html = $purifier->purify($html);
         $html = str_replace('http-equiv', '', $html);
-        $html = $this->handleOuterLink($html, $safeDomains);
-        $html = $this->filterInvalidImgSrc($html);
+        if(empty($extraConfig['allowedOuterLink'])){
+            $html = $this->handleOuterLink($html, $safeDomains);
+        }
+        if(empty($extraConfig['allowedImgSrc'])) {
+            $html = $this->filterInvalidImgSrc($html);
+        }
 
         if (!$trusted) {
             return $html;
