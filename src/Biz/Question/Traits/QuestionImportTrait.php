@@ -6,6 +6,7 @@ use Biz\Content\Service\FileService;
 use Biz\Question\Adapter\QuestionParseAdapter;
 use Biz\Question\QuestionParseClient;
 use Biz\Question\Service\QuestionService;
+use Biz\QuestionBank\QuestionBankException;
 use Ramsey\Uuid\Uuid;
 
 trait QuestionImportTrait
@@ -31,15 +32,19 @@ trait QuestionImportTrait
 
     private function downloadRemoteImgToLocal($imgs)
     {
-        $localImgs = [];
-        foreach ($imgs as $img) {
-            preg_match('/https?:\/\/(.*?)\/(.*?)\.(.*)/', $img, $match);
-            $localPath = $this->container->getParameter('topxia.upload.public_directory').'/'.Uuid::uuid4().'.'.$match[3];
-            file_put_contents($localPath, file_get_contents($img));
-            $localImgs[] = $localPath;
-        }
+        try {
+            $localImgs = [];
+            foreach ($imgs as $img) {
+                preg_match('/https?:\/\/(.*?)\/(.*?)\.(.*)/', $img, $match);
+                $localPath = $this->container->getParameter('topxia.upload.public_directory') . '/' . Uuid::uuid4() . '.' . $match[3];
+                file_put_contents($localPath, file_get_contents($img));
+                $localImgs[] = $localPath;
+            }
 
-        return $this->getFileService()->addFiles('question', $localImgs);
+            return $this->getFileService()->addFiles('question', $localImgs);
+        } catch (\Exception $e) {
+            throw QuestionBankException::IMAGE_DOWNLOAD_ERROR();
+        }
     }
 
     private function convertImgUri(array $uris)

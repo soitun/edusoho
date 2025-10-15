@@ -11206,6 +11206,8 @@ exception.discovery_column.not_found: 发现栏目不存在
 exception.question_bank.forbidden_delete_category: 分类或子分类下有所属题库，无法删除
 exception.question_bank.not_found_bank: 题库不存在
 exception.question_bank.forbidden_access_bank: 没有访问该题库的权限
+exception.question_bank.unknown_error: 未知错误
+exception.question_bank.image_download_error: 图片下载失败
 
 exception.item_bank_exercise.chapter_answer_is_doing: 已存在练习记录，请重新开始答题
 exception.item_bank_exercise.forbidden_learn: 您购买的题库练习已到期，无法进行章节、试卷等练习。如有疑问请联系老师。
