@@ -345,7 +345,7 @@ class CloudFileImplementorImpl extends BaseService implements FileImplementor
         $user = $this->getCurrentUser();
 
         $globalIds = array_unique(ArrayToolkit::column($files, 'globalId'));
-        $globalIdsChunks = array_chunk($globalIds, 200);
+        $globalIdsChunks = array_chunk($globalIds, 50);
         $data = [];
         $count = 0;
         if (!empty($user['isSecure'])) {
