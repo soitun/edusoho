@@ -8404,6 +8404,18 @@ admin.anti_fraud_reminder.tips.app.button: 查看防骚扰设置教程 >
 admin.anti_fraud_reminder.every: 每
 admin.anti_fraud_reminder.every_day_reminder: 天提醒一次
 
+#短信验证设置
+admin.sms_secondary_verification.setting: 短信验证设置
+admin.sms_secondary_verification.setting.tips: 开启后，在进行敏感操作时需要短信验证
+admin.sms_secondary_verification.open_radio: 开启
+admin.sms_secondary_verification.close_radio: 关闭
+admin.sms_secondary_verification.export_setting: 用户信息导出短信验证
+admin.sms_secondary_verification.export_setting.tips: 开启后，导出用户信息时需要短信验证
+admin.sms_secondary_verification.export_warning_title: 警告
+admin.sms_secondary_verification.export_warning_content: 关闭短信验证后，任何拥有管理员权限的账号均可直接导出用户数据，这将增加数据泄露的风险，请确保您已充分了解并接受此风险。
+admin.sms_secondary_verification.delete_user_setting: 删除用户短信验证
+admin.sms_secondary_verification.delete_user_setting.tips: 开启后，删除用户时需要短信验证
+
 # 系统自检
 admin.reports_status.environmental_detection: 环境检测
 admin.reports_status.recommend_config: 推荐配置

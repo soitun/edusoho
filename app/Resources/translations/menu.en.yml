@@ -963,6 +963,7 @@ admin_v2.system.blacklist_tab: IP Blacklist
 admin_v2.system.security_tab: Whitelist Domain
 admin_v2.system.post_num_tab: Post Setting
 admin_v2.system.anti_fraud_reminder_tab: APP anti-fraud pop-up window settings
+admin_v2.system.sms_secondary_verification_tab: SMS Verification Settings
 
 # 系统-系统管理-短信防御管理
 admin_v2.system.sms_defence_menu: Sms Defence

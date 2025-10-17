@@ -7024,6 +7024,18 @@ admin.anti_fraud_reminder.tips.app.button: View Tutorial >
 admin.anti_fraud_reminder.every: Every
 admin.anti_fraud_reminder.every_day_reminder: Day remind once
 
+#SMS Secondary Verification Settings
+admin.sms_secondary_verification.setting: SMS Secondary Verification Settings
+admin.sms_secondary_verification.setting.tips: After opening, SMS verification is required for sensitive operations
+admin.sms_secondary_verification.open_radio: Open
+admin.sms_secondary_verification.close_radio: Closed
+admin.sms_secondary_verification.export_setting: User Information Export SMS Verification
+admin.sms_secondary_verification.export_setting.tips: After opening, SMS verification is required when exporting user information
+admin.sms_secondary_verification.export_warning_title: Warning
+admin.sms_secondary_verification.export_warning_content: After disabling SMS verification, any account with administrator privileges can directly export user data, which increases the risk of data leakage. Please ensure you fully understand and accept this risk.
+admin.sms_secondary_verification.delete_user_setting: Delete User SMS Verification
+admin.sms_secondary_verification.delete_user_setting.tips: After opening, SMS verification is required when deleting users
+
 admin.reports_status.environmental_detection: 'Environment test'
 admin.reports_status.recommend_config: 'Recommended configuration'
 admin.reports_status.current_status: 'Current status'
