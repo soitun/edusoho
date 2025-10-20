@@ -138,6 +138,67 @@ class SettingController extends BaseController
         ]);
     }
 
+    /**
+     * 短信验证设置
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response|null
+     */
+    public function SMSSecondaryVerificationAction(Request $request)
+    {
+        $cloudSmsSetting = $this->getSettingService()->get('cloud_sms');
+        
+        // 设置默认值
+        $defaultSettings = [
+            'sms_secondary_verification_export' => 'on',
+            'sms_secondary_verification_delete_user' => 'on'
+        ];
+        
+        if (empty($cloudSmsSetting)) {
+            $cloudSmsSetting = array_merge($defaultSettings, $cloudSmsSetting);
+            $this->getSettingService()->set('cloud_sms', $cloudSmsSetting);
+        } else {
+            // 确保新字段存在，如果不存在则使用默认值
+            foreach ($defaultSettings as $key => $defaultValue) {
+                if (!isset($cloudSmsSetting[$key])) {
+                    $cloudSmsSetting[$key] = $defaultValue;
+                }
+            }
+        }
+
+        if ('POST' == $request->getMethod()) {
+            $data = $request->request->all();
+            
+            // 更新短信验证设置，保存为on/off格式
+            $cloudSmsSetting['sms_secondary_verification_export'] = isset($data['sms_secondary_verification_export']) && $data['sms_secondary_verification_export'] === '1' ? 'on' : 'off';
+            $cloudSmsSetting['sms_secondary_verification_delete_user'] = isset($data['sms_secondary_verification_delete_user']) && $data['sms_secondary_verification_delete_user'] === '1' ? 'on' : 'off';
+            
+            $this->getSettingService()->set('cloud_sms', $cloudSmsSetting);
+            $this->setFlashMessage('success', 'site.save.success');
+        }
+
+        // 处理显示值，兼容1/0和on/off格式
+        $displaySettings = $cloudSmsSetting;
+        $displaySettings['sms_secondary_verification_export'] = $this->normalizeBooleanValue($cloudSmsSetting['sms_secondary_verification_export']);
+        $displaySettings['sms_secondary_verification_delete_user'] = $this->normalizeBooleanValue($cloudSmsSetting['sms_secondary_verification_delete_user']);
+
+        return $this->render('admin-v2/system/security/sms-secondary-verification.html.twig', [
+            'setting' => $displaySettings,
+        ]);
+    }
+
+    /**
+     * 标准化布尔值，兼容1/0和on/off格式
+     * @param mixed $value
+     * @return bool
+     */
+    private function normalizeBooleanValue($value)
+    {
+        if ($value === 'on' || $value === '1' || $value === 1 || $value === true) {
+            return true;
+        }
+        return false;
+    }
+
     public function logoRemoveAction(Request $request)
     {
         $setting = $this->getSettingService()->get('site');

@@ -60,8 +60,18 @@
 
       <button class="btn btn-primary">{{ 'form.btn.search'|trans }}</button>
       {% if canExport %}
-      <button class="btn-primary cd-btn cd-btn-info cd-btn-sm mhs order-js-export-btn" type="button" id="student-add-btn"><i class="es-icon es-icon-filedownload"></i> {{'form.btn.export'|trans}}</button>
-      {% include 'export/export-modal.html.twig' %}
+        {% set smsSetting = setting('cloud_sms.sms_secondary_verification_export')|default('on') %}
+        {% if (smsSetting == 'on' or smsSetting == 1) %}
+          <button class="btn btn-primary mhs js-export-with-sms-btn" type="button" data-toggle="modal"
+                  data-target="#modal"
+                  data-url="{{ path('admin_v2_secondary_verification', {exportFileName:'order', targetFormId: 'order'}) }}">
+            {{ 'form.btn.export'|trans }}</button>
+          {% include 'export/export-modal.html.twig' %}
+        {% else %}
+          {% include 'export/export-btn.html.twig' with
+            {'exportFileName': 'order',
+              'targetFormId': 'order-search-form'} %}
+        {% endif %}
       {% endif %}
     </div>
   </form>

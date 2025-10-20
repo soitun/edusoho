@@ -258,6 +258,7 @@ const courseStatus = getData('student-list-app', 'course-status');
 const isNormalCourse = !!getData('student-list-app', 'is-normal-course');
 const isEnableAddAndRemove = getData('student-list-app', 'enable-add-and-remove');
 const isEnableExport = getData('student-list-app', 'enable-export');
+const requireSmsVerification = getData('student-list-app', 'require-sms-verification');
 
 const permissions = ref([]);
 const fetchPermissions = async () => {
@@ -503,12 +504,15 @@ const onExport = async () => {
   const filterParams = Object.fromEntries(
     Object.entries(params).filter(([_, v]) => v !== undefined)
   );
-  const verificationResponse = await fetch(`/secondary/verification?exportFileName=courseStudent&targetFormId=${courseId}&` + new URLSearchParams(filterParams));
-  const html = await verificationResponse.text();
-  $modal.html(html).modal('show');
-  return;
-  if (exporting) {
+
+  if (requireSmsVerification!=='off') {
+    const verificationResponse = await fetch(`/secondary/verification?exportFileName=courseStudent&targetFormId=${courseId}&` + new URLSearchParams(filterParams));
+    const html = await verificationResponse.text();
+    $modal.html(html).modal('show');
     return;
+    if (exporting) {
+      return;
+    }
   }
   exporting = true;
   const response = await Api.exportData.try('course-students', {

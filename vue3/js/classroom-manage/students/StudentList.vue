@@ -242,6 +242,8 @@ import {
 const classroomId = getData('student-list-app', 'classroom-id');
 const classroomStatus = getData('student-list-app', 'classroom-status');
 const isEnableExport = getData('student-list-app', 'enable-export');
+const requireSmsVerification = getData('student-list-app', 'require-sms-verification');
+
 
 const permissions = ref([]);
 const fetchPermissions = async () => {
@@ -487,10 +489,12 @@ const exportData = async (start, fileName) => {
   const params = Object.fromEntries(
     Object.entries(rawParams).filter(([_, v]) => v !== undefined)
   );
-  const verificationResponse = await fetch(`/secondary/verification?exportFileName=classroomStudent&targetFormId=${classroomId}&` + new URLSearchParams(params));
-  const html = await verificationResponse.text();
-  $modal.html(html).modal('show');
-  return;
+  if (requireSmsVerification!=='off') {
+    const verificationResponse = await fetch(`/secondary/verification?exportFileName=classroomStudent&targetFormId=${classroomId}&` + new URLSearchParams(params));
+    const html = await verificationResponse.text();
+    $modal.html(html).modal('show');
+    return;
+  }
 
   const response = await Api.classroomMember.export(classroomId, params);
   if (response.status === 'getData') {

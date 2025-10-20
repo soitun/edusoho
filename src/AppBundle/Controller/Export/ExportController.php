@@ -14,7 +14,8 @@ class ExportController extends BaseController
     public function tryExportAction(Request $request, $name, $limit)
     {
         $conditions = $request->query->all();
-        if ('order' == $name) {
+        $settingValue = $this->getSettingService()->node('cloud_sms.sms_secondary_verification_export', 'on');
+        if ($settingValue === 'on' && 'order' == $name) {
             $request->request->set('sms_code', $request->query->get('sms_code'));
             $request->request->set('mobile', $request->query->get('mobile'));
             list($result, $sessionField, $requestField) = SmsToolkit::smsCheck($request, 'sms_secondary_verification');
