@@ -127,6 +127,7 @@ class ClassroomManageController extends BaseController
         );
         $this->appendLearningProgress($students, $id);
 
+        $requireSmsVerification = $this->getSettingService()->node('cloud_sms.sms_secondary_verification_export', 'on');
         return $this->render(
             'classroom-manage/student.html.twig',
             [
@@ -139,6 +140,7 @@ class ClassroomManageController extends BaseController
                 'canExport' => $this->getCurrentUser()->hasPermission('custom_export_permission'),
                 'disableDeleteSearchResult' => empty($fields['keyword']) && empty($fields['expired']),
                 'offset' => $paginator->getOffsetCount(),
+                'requireSmsVerification' => $requireSmsVerification,
             ]
         );
     }

@@ -14,7 +14,22 @@
 </div>
 {% if btnGroup|default() %}
   <div class="course-main-header__operation">
-    <button class="cd-btn  mhs cd-btn-sm pull-right cd-btn-primary course-order-js-export-btn" type="button" id="student-add-btn" data-toggle="modal" data-target="#modal"><i class="es-icon es-icon-filedownload cd-text-sm"></i> {{'form.btn.export'|trans}}</button>
-    {% include 'export/export-modal.html.twig' %}
+    {% set smsSetting = setting('cloud_sms.sms_secondary_verification_export')|default('on') %}
+    {% if (smsSetting == 'on' or smsSetting == 1) %}
+{#      <button class="cd-btn  mhs cd-btn-sm pull-right cd-btn-primary course-order-js-export-btn" type="button"#}
+{#              id="student-add-btn" data-toggle="modal" data-target="#modal"><i#}
+{#                class="es-icon es-icon-filedownload cd-text-sm"></i> {{ 'form.btn.export'|trans }}</button>#}
+      <button class="btn btn-primary mhs course-order-js-export-btn" type="button" data-toggle="modal"
+              data-target="#modal"
+              data-url="{{ path('admin_v2_secondary_verification', {exportFileName:'order', targetFormId: 'order'}) }}">
+        {{ 'form.btn.export'|trans }}</button>
+      {% include 'export/export-modal.html.twig' %}
+    {% else %}
+      {% include 'export/export-btn.html.twig' with
+        {'exportFileName': 'order',
+            'exportWebpack': true,
+          'targetFormId': 'user-search-form'} %}
+    {% endif %}
+
   </div>
 {% endif %}

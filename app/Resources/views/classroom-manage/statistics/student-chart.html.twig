@@ -21,7 +21,17 @@
         <i class="es-icon es-icon-search"></i>
     </span>
   <input type="hidden" name="classroomId" value="{{ classroom.id }}">
-  <button class=" cd-btn  mhs cd-btn-sm pull-right cd-btn-primary classroom-student-chart-js-export-btn" type="button" id="student-add-btn"><i class="es-icon es-icon-filedownload cd-text-sm"></i> {{'form.btn.export'|trans}}</button>
+    {% set smsSetting = setting('cloud_sms.sms_secondary_verification_export')|default('on') %}
+    {% if (smsSetting == 'on' or smsSetting == 1) %}
+        <button class=" cd-btn  mhs cd-btn-sm pull-right cd-btn-primary classroom-student-chart-js-export-btn"
+                type="button" id="student-add-btn"><i
+                    class="es-icon es-icon-filedownload cd-text-sm"></i> {{ 'form.btn.export'|trans }}</button>
+    {% else %}
+        {% include 'export/export-btn.html.twig' with
+            {'exportFileName': 'classroom-statistics-students-learn',
+                'exportWebpack': true,
+                'targetFormId': 'overview-student-detail'} %}
+    {% endif %}
 </form>
 <button class="btn btn-primary pull-right hide">{{ 'form.btn.export'|trans }}</button>
 <div id="student-detail-chart"

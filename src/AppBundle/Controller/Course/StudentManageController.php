@@ -70,6 +70,7 @@ class StudentManageController extends BaseController
             $hasExportPermission = $this->getSettingService()->node('course.teacher_export_student', false) && in_array('ROLE_TEACHER', $this->getCurrentUser()->getRoles());
         }
 
+        $requireSmsVerification = $this->getSettingService()->node('cloud_sms.sms_secondary_verification_export', 'on');
         return $this->render('course-manage/student/index.html.twig', [
             'courseSet' => $this->getCourseSetService()->getCourseSet($courseSetId),
             'course' => $course,
@@ -81,6 +82,7 @@ class StudentManageController extends BaseController
             'offset' => $paginator->getOffsetCount(),
             'isEnableAddAndRemove' => $isEnableAddAndRemove,
             'enableExport' => $hasExportPermission && $this->getCurrentUser()->hasPermission('custom_export_permission'),
+            'requireSmsVerification' => $requireSmsVerification,
         ]);
     }
 
