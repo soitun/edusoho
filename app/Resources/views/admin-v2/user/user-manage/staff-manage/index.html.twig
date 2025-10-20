@@ -79,6 +79,14 @@
       {% endif %}
     {% endif %}
 
+    {# 删除用户是否需要二次验证标识 #}
+    {% set needValidate = setting('cloud_sms.sms_secondary_verification_delete_user')|default('on') %}
+    {% if (needValidate == 'on' or needValidate == 1) %}
+      <input type="hidden" id="needValidate" value="1">
+    {% else %}
+      <input type="hidden" id="needValidate" value="0">
+    {% endif %}
+
     <input type="hidden" name="isStaff" value="1">
   </form>
 
