@@ -29,10 +29,10 @@ class Qrcode extends AbstractResource
             )
         );
         $url = $this->generateUrl('common_parse_qrcode', array('token' => $token['token']), UrlGeneratorInterface::ABSOLUTE_URL);
-
-        return array(
-            'img' => $this->generateUrl('common_qrcode', array('text' => $url), UrlGeneratorInterface::ABSOLUTE_URL),
-        );
+        return [
+            'data' => ['img' => $this->generateUrl('common_qrcode', array('text' => $url), UrlGeneratorInterface::ABSOLUTE_URL),
+            ]
+        ];
     }
 
     public function fillParams($params)
